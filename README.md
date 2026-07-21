@@ -1,5 +1,7 @@
 # data-impact-graph
 
+[![ci](https://github.com/pcloudata/data-impact-graph/actions/workflows/ci.yml/badge.svg)](https://github.com/pcloudata/data-impact-graph/actions/workflows/ci.yml)
+
 Cross-stack **impact, ownership, and lineage** for data platform teams — modeled as a minimal property graph over Jira, Confluence, GitHub, AWS, Snowflake, and Power BI.
 
 This is a **showcase / reference design**, not a production catalog. It answers questions like:
@@ -65,13 +67,24 @@ curl "http://127.0.0.1:8000/impact?dataset=acme.raw.sales.orders"
 
 Sample response: [docs/screenshots/impact_api.json](docs/screenshots/impact_api.json).
 
-### Snowflake extractor stub
+### Extractor stubs
 
 ```bash
 python -m extractors.snowflake --pretty
+python -m extractors.powerbi --pretty
+
+# Production-shaped ingest: extract → upsert into NetworkX
+python scripts/merge_snowflake_extract.py --empty --pretty
 ```
 
-Reads mocked INFORMATION_SCHEMA-shaped JSON and emits `Dataset` nodes + `DERIVES_FROM` edges (production path without live credentials).
+- Snowflake: mocked INFORMATION_SCHEMA → `Dataset` + `DERIVES_FROM`
+- Power BI: mocked Admin Scanner → `Report` / `SemanticModel` + `USES` / `BINDS`
+
+### Tests
+
+```bash
+pytest -q
+```
 
 ## What’s in the box
 
@@ -86,9 +99,12 @@ Reads mocked INFORMATION_SCHEMA-shaped JSON and emits `Dataset` nodes + `DERIVES
 | [`graph/queries/`](graph/queries/) | Impact / ownership / governance Cypher |
 | [`fixtures/`](fixtures/) | JSON stand-ins for tool extracts |
 | [`extractors/snowflake.py`](extractors/snowflake.py) | INFORMATION_SCHEMA → graph stub |
+| [`extractors/powerbi.py`](extractors/powerbi.py) | Scanner API → Report/USES stub |
+| [`scripts/merge_snowflake_extract.py`](scripts/merge_snowflake_extract.py) | Extract → NetworkX upsert path |
 | [`api/main.py`](api/main.py) | FastAPI `GET /impact` |
+| [`tests/test_smoke.py`](tests/test_smoke.py) | Pytest smoke suite |
 | [`scripts/demo_queries.py`](scripts/demo_queries.py) | Docker-free query demo |
-| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Runs demo + extractor smoke tests |
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Demo + extractors + pytest |
 
 ## Example blast radius
 

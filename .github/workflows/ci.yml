@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  demo-queries:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,16 +21,13 @@ jobs:
       - name: Run demo query pack
         run: python scripts/demo_queries.py
 
-      - name: Run Snowflake extractor stub
-        run: python -m extractors.snowflake --pretty
-
-      - name: Smoke-test impact helper
+      - name: Run extractor stubs
         run: |
-          python - <<'PY'
-          from impact_graph.graph import build_graph, impact_for_dataset
-          g = build_graph()
-          payload = impact_for_dataset(g, "acme.raw.sales.orders")
-          assert payload["reports"], payload
-          assert any(r["name"] == "Finance Close" for r in payload["reports"]), payload
-          print("impact ok:", payload["dataset"], "->", [r["name"] for r in payload["reports"]])
-          PY
+          python -m extractors.snowflake --pretty
+          python -m extractors.powerbi --pretty
+
+      - name: Merge Snowflake extract into graph
+        run: python scripts/merge_snowflake_extract.py --empty --pretty
+
+      - name: Pytest smoke suite
+        run: pytest -q

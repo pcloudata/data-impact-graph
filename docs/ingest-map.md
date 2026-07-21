@@ -10,6 +10,7 @@ v0 uses **JSON fixtures** under [`fixtures/`](../fixtures/) instead of live APIs
 | `snowflake.json` | `Dataset` | `DERIVES_FROM` |
 | `snowflake_information_schema.json` | `Dataset` (via [`extractors/snowflake.py`](../extractors/snowflake.py)) | `DERIVES_FROM` from mocked OBJECT_DEPENDENCIES |
 | `powerbi.json` | `Report`, `SemanticModel` | `BINDS`, `USES` |
+| `powerbi_scanner.json` | `Report`, `SemanticModel` (via [`extractors/powerbi.py`](../extractors/powerbi.py)) | `BINDS`, `USES` from mocked scanner datasources |
 | `jira.json` | `Ticket` | `TRACKS` |
 | `confluence.json` | `Doc`, `GlossaryTerm` | `DESCRIBES`, `DEFINES` |
 

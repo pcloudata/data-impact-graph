@@ -1,0 +1,67 @@
+{
+  "as_of": "2026-07-20",
+  "notes": "Mocked Power BI Admin Scanner API shape (workspaces → reports/datasets). Production would call the scanner and resolve Snowflake FQNs from datasource details.",
+  "workspaces": [
+    {
+      "id": "ws-finance",
+      "name": "Finance",
+      "datasets": [
+        {
+          "id": "ds-orders",
+          "name": "Orders Model",
+          "configuredBy": "ava@example.com",
+          "datasourceUsages": [
+            {
+              "datasourceInstanceId": "dsrc-snowflake-acme",
+              "snowflake": {
+                "server": "acme.snowflakecomputing.com",
+                "database": "ANALYTICS",
+                "schema": "MART",
+                "table": "ORDERS"
+              }
+            }
+          ]
+        }
+      ],
+      "reports": [
+        {
+          "id": "rpt-finance-close",
+          "name": "Finance Close",
+          "datasetId": "ds-orders",
+          "criticality": "P1"
+        }
+      ]
+    },
+    {
+      "id": "ws-marketing",
+      "name": "Marketing",
+      "datasets": [
+        {
+          "id": "ds-campaigns",
+          "name": "Campaign Model",
+          "configuredBy": "sam@example.com",
+          "datasourceUsages": [
+            {
+              "datasourceInstanceId": "dsrc-snowflake-acme",
+              "snowflake": {
+                "server": "acme.snowflakecomputing.com",
+                "database": "ANALYTICS",
+                "schema": "MART",
+                "table": "CAMPAIGN_ROI"
+              }
+            }
+          ]
+        }
+      ],
+      "reports": [
+        {
+          "id": "rpt-campaign-roi",
+          "name": "Campaign ROI",
+          "datasetId": "ds-campaigns",
+          "criticality": "P2"
+        }
+      ]
+    }
+  ],
+  "account": "acme"
+}

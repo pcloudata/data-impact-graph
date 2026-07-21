@@ -8,6 +8,16 @@ This is a **showcase / reference design**, not a production catalog. It answers 
 - Which datasets have no owning team?
 - Which open Jira bugs track jobs that feed P1 reports?
 
+## Interview talk track (30–60s)
+
+**Problem.** Platform work spans Jira, Confluence, GitHub, AWS, Snowflake, and Power BI. Blast radius is tribal knowledge.
+
+**Graph.** Encode those systems as nodes and typed edges (owns, writes, derives_from, uses, tracks) with stable IDs and provenance.
+
+**Punchline.** Change impact on `acme.raw.sales.orders` surfaces curated/mart tables, `orders_etl`, and P1 **Finance Close** in one hop path — see [docs/screenshots/demo_queries.txt](docs/screenshots/demo_queries.txt).
+
+> Full script: [docs/talk-track.md](docs/talk-track.md)
+
 ## When *not* to build this
 
 Prefer Snowflake native lineage + a data catalog (DataHub, OpenMetadata, Alation) + Confluence glossary when:
@@ -45,7 +55,23 @@ pip install -r requirements.txt
 python scripts/demo_queries.py
 ```
 
-This loads the same seed fixtures into an in-memory NetworkX graph and prints the query pack results.
+### Option C — Impact API
+
+```bash
+source .venv/bin/activate
+uvicorn api.main:app --reload --port 8000
+curl "http://127.0.0.1:8000/impact?dataset=acme.raw.sales.orders"
+```
+
+Sample response: [docs/screenshots/impact_api.json](docs/screenshots/impact_api.json).
+
+### Snowflake extractor stub
+
+```bash
+python -m extractors.snowflake --pretty
+```
+
+Reads mocked INFORMATION_SCHEMA-shaped JSON and emits `Dataset` nodes + `DERIVES_FROM` edges (production path without live credentials).
 
 ## What’s in the box
 
@@ -54,11 +80,15 @@ This loads the same seed fixtures into an in-memory NetworkX graph and prints th
 | [`docs/schema.md`](docs/schema.md) | v0 node/edge types + ID conventions |
 | [`docs/ingest-map.md`](docs/ingest-map.md) | Mock source → graph mapping |
 | [`docs/go-no-go.md`](docs/go-no-go.md) | Leadership checklist |
+| [`docs/talk-track.md`](docs/talk-track.md) | 30–60s interview script |
+| [`docs/screenshots/`](docs/screenshots/) | Captured demo + API output |
 | [`graph/seed.cypher`](graph/seed.cypher) | Synthetic but realistic demo graph |
 | [`graph/queries/`](graph/queries/) | Impact / ownership / governance Cypher |
 | [`fixtures/`](fixtures/) | JSON stand-ins for tool extracts |
-| [`scripts/load_seed.py`](scripts/load_seed.py) | Build Cypher seed from fixtures |
+| [`extractors/snowflake.py`](extractors/snowflake.py) | INFORMATION_SCHEMA → graph stub |
+| [`api/main.py`](api/main.py) | FastAPI `GET /impact` |
 | [`scripts/demo_queries.py`](scripts/demo_queries.py) | Docker-free query demo |
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Runs demo + extractor smoke tests |
 
 ## Example blast radius
 
@@ -80,6 +110,13 @@ Team Finance Data ──OWNS──▶ ANALYTICS.ORDERS ◀──USES── Power
 2. **Edges carry provenance** — `source`, `as_of`, `confidence` on every relationship.
 3. **Table-level first** — column lineage is v0.5+ (noisy and expensive).
 4. **Catalog-friendly** — this graph complements a catalog; it does not replace Snowflake or Power BI.
+
+## Profile pin (manual)
+
+Repo topics are set (`data-engineering`, `lineage`, `knowledge-graph`, `snowflake`, `neo4j`). GitHub does not expose a stable public API to pin repos on a profile — pin it in the UI:
+
+1. Open https://github.com/pcloudata
+2. Customize pinned repositories → select **data-impact-graph**
 
 ## License
 

@@ -8,6 +8,7 @@ v0 uses **JSON fixtures** under [`fixtures/`](../fixtures/) instead of live APIs
 | `github.json` | `Repository` | `OWNS` (from CODEOWNERS), `IMPLEMENTS` |
 | `aws_jobs.json` | `Pipeline` | `READS`, `WRITES`, `DEPLOYS_FROM` |
 | `snowflake.json` | `Dataset` | `DERIVES_FROM` |
+| `snowflake_information_schema.json` | `Dataset` (via [`extractors/snowflake.py`](../extractors/snowflake.py)) | `DERIVES_FROM` from mocked OBJECT_DEPENDENCIES |
 | `powerbi.json` | `Report`, `SemanticModel` | `BINDS`, `USES` |
 | `jira.json` | `Ticket` | `TRACKS` |
 | `confluence.json` | `Doc`, `GlossaryTerm` | `DESCRIBES`, `DEFINES` |

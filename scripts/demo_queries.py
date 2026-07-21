@@ -3,206 +3,23 @@
 
 from __future__ import annotations
 
-import json
+import sys
 from pathlib import Path
 
-import networkx as nx
-
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURES = ROOT / "fixtures"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from impact_graph.graph import (  # noqa: E402
+    build_graph,
+    descendants_via_derives,
+    in_edges,
+    nodes_by_label,
+    out_edges,
+)
 
 
-def load_json(name: str) -> dict:
-    return json.loads((FIXTURES / name).read_text())
-
-
-def edge_attrs(source: str, confidence: float = 1.0) -> dict:
-    return {
-        "source": source,
-        "as_of": "2026-07-20",
-        "confidence": confidence,
-        "extractor_version": "fixtures-v0",
-    }
-
-
-def build_graph() -> nx.MultiDiGraph:
-    g = nx.MultiDiGraph()
-    teams = load_json("teams.json")
-    github = load_json("github.json")
-    aws = load_json("aws_jobs.json")
-    snow = load_json("snowflake.json")
-    pbi = load_json("powerbi.json")
-    jira = load_json("jira.json")
-    conf = load_json("confluence.json")
-
-    for team in teams["teams"]:
-        g.add_node(team["id"], label="Team", name=team["name"], cost_center=team["cost_center"])
-        for member in team["members"]:
-            g.add_node(member["id"], label="Person", name=member["name"], slack=member["slack"])
-            g.add_edge(member["id"], team["id"], key="MEMBER_OF", type="MEMBER_OF", **edge_attrs("teams"))
-        owns = team["owns"]
-        for dataset_id in owns["datasets"]:
-            g.add_edge(team["id"], dataset_id, key="OWNS", type="OWNS", **edge_attrs("teams"))
-        for pipeline_id in owns["pipelines"]:
-            g.add_edge(team["id"], pipeline_id, key="OWNS", type="OWNS", **edge_attrs("teams"))
-        for report_id in owns["reports"]:
-            g.add_edge(team["id"], report_id, key="OWNS", type="OWNS", **edge_attrs("teams"))
-        for repo_id in owns["repositories"]:
-            g.add_edge(team["id"], repo_id, key="OWNS", type="OWNS", **edge_attrs("teams"))
-
-    for repo in github["repositories"]:
-        g.add_node(
-            repo["id"],
-            label="Repository",
-            url=repo["url"],
-            default_branch=repo["default_branch"],
-        )
-        for pipeline_id in repo["implements_pipelines"]:
-            g.add_edge(repo["id"], pipeline_id, key="IMPLEMENTS", type="IMPLEMENTS", **edge_attrs("github"))
-
-    for job in aws["pipelines"]:
-        g.add_node(
-            job["id"],
-            label="Pipeline",
-            name=job["name"],
-            tool=job["tool"],
-            env=job["env"],
-            schedule=job["schedule"],
-            arn=job["arn"],
-        )
-        if job.get("repository"):
-            g.add_edge(
-                job["id"],
-                job["repository"],
-                key="DEPLOYS_FROM",
-                type="DEPLOYS_FROM",
-                **edge_attrs("aws_jobs"),
-            )
-        for dataset_id in job["reads"]:
-            g.add_edge(job["id"], dataset_id, key="READS", type="READS", **edge_attrs("aws_jobs"))
-        for dataset_id in job["writes"]:
-            g.add_edge(job["id"], dataset_id, key="WRITES", type="WRITES", **edge_attrs("aws_jobs"))
-
-    for dataset in snow["datasets"]:
-        g.add_node(
-            dataset["id"],
-            label="Dataset",
-            fq_name=dataset["id"],
-            object_type=dataset["object_type"],
-            layer=dataset["layer"],
-            pii=dataset["pii"],
-        )
-        for upstream in dataset["upstream"]:
-            g.add_edge(
-                dataset["id"],
-                upstream,
-                key="DERIVES_FROM",
-                type="DERIVES_FROM",
-                **edge_attrs("snowflake"),
-            )
-
-    for model in pbi["semantic_models"]:
-        g.add_node(
-            model["id"],
-            label="SemanticModel",
-            name=model["name"],
-            workspace_name=model["workspace_name"],
-        )
-        for dataset_id in model["snowflake_datasets"]:
-            g.add_edge(model["id"], dataset_id, key="USES", type="USES", **edge_attrs("powerbi"))
-
-    for report in pbi["reports"]:
-        g.add_node(
-            report["id"],
-            label="Report",
-            name=report["name"],
-            workspace_name=report["workspace_name"],
-            criticality=report["criticality"],
-        )
-        g.add_edge(
-            report["id"],
-            report["semantic_model"],
-            key="BINDS",
-            type="BINDS",
-            **edge_attrs("powerbi"),
-        )
-        for dataset_id in report["snowflake_datasets"]:
-            g.add_edge(report["id"], dataset_id, key="USES", type="USES", **edge_attrs("powerbi"))
-
-    for ticket in jira["tickets"]:
-        g.add_node(
-            ticket["id"],
-            label="Ticket",
-            type=ticket["type"],
-            status=ticket["status"],
-            priority=ticket["priority"],
-            url=ticket["url"],
-        )
-        for target in ticket["tracks"]:
-            g.add_edge(ticket["id"], target["id"], key="TRACKS", type="TRACKS", **edge_attrs("jira"))
-
-    for doc in conf["docs"]:
-        g.add_node(doc["id"], label="Doc", title=doc["title"], url=doc["url"])
-        for target in doc["describes"]:
-            g.add_edge(doc["id"], target["id"], key="DESCRIBES", type="DESCRIBES", **edge_attrs("confluence"))
-
-    for term in conf["glossary"]:
-        g.add_node(
-            term["id"],
-            label="GlossaryTerm",
-            definition=term["definition"],
-            status=term["status"],
-        )
-        for dataset_id in term["defined_by_datasets"]:
-            confidence = 0.6 if term["id"] == "campaign_roi" and "orders" in dataset_id else 1.0
-            g.add_edge(
-                dataset_id,
-                term["id"],
-                key="DEFINES",
-                type="DEFINES",
-                **edge_attrs("confluence", confidence=confidence),
-            )
-
-    return g
-
-
-def nodes_by_label(g: nx.MultiDiGraph, label: str) -> list[str]:
-    return [n for n, attrs in g.nodes(data=True) if attrs.get("label") == label]
-
-
-def out_edges(g: nx.MultiDiGraph, node: str, edge_type: str) -> list[str]:
-    return [
-        v
-        for _, v, data in g.out_edges(node, data=True)
-        if data.get("type") == edge_type
-    ]
-
-
-def in_edges(g: nx.MultiDiGraph, node: str, edge_type: str) -> list[str]:
-    return [
-        u
-        for u, _, data in g.in_edges(node, data=True)
-        if data.get("type") == edge_type
-    ]
-
-
-def descendants_via_derives(g: nx.MultiDiGraph, root: str) -> set[str]:
-    """Datasets that DERIVES_FROM* root (downstream points at upstream)."""
-    found: set[str] = set()
-    stack = [root]
-    seen = {root}
-    while stack:
-        current = stack.pop()
-        for upstream_ref in in_edges(g, current, "DERIVES_FROM"):
-            # upstream_ref is downstream dataset that derives from current
-            if upstream_ref not in seen:
-                seen.add(upstream_ref)
-                found.add(upstream_ref)
-                stack.append(upstream_ref)
-    return found
-
-
-def query_blast_radius(g: nx.MultiDiGraph) -> None:
+def query_blast_radius(g) -> None:
     root = "acme.raw.sales.orders"
     downstream = descendants_via_derives(g, root)
     relevant = {root} | downstream
@@ -227,7 +44,7 @@ def query_blast_radius(g: nx.MultiDiGraph) -> None:
     print(f"  pipelines: {pipelines}")
 
 
-def query_orphan_datasets(g: nx.MultiDiGraph) -> None:
+def query_orphan_datasets(g) -> None:
     owned = {v for _, v, data in g.edges(data=True) if data.get("type") == "OWNS"}
     orphans = sorted(d for d in nodes_by_label(g, "Dataset") if d not in owned)
     print("02 orphan_datasets")
@@ -235,7 +52,7 @@ def query_orphan_datasets(g: nx.MultiDiGraph) -> None:
         print(f"  {dataset_id} layer={g.nodes[dataset_id].get('layer')}")
 
 
-def query_p1_risk(g: nx.MultiDiGraph) -> None:
+def query_p1_risk(g) -> None:
     print("03 p1_risk_open_bugs")
     for ticket_id in nodes_by_label(g, "Ticket"):
         ticket = g.nodes[ticket_id]
@@ -258,7 +75,7 @@ def query_p1_risk(g: nx.MultiDiGraph) -> None:
                     )
 
 
-def query_report_to_repo(g: nx.MultiDiGraph) -> None:
+def query_report_to_repo(g) -> None:
     report_id = "ws-finance:rpt-finance-close"
     print("04 report_to_repo")
     for dataset_id in out_edges(g, report_id, "USES"):
@@ -274,7 +91,7 @@ def query_report_to_repo(g: nx.MultiDiGraph) -> None:
             )
 
 
-def query_glossary_drift(g: nx.MultiDiGraph) -> None:
+def query_glossary_drift(g) -> None:
     print("05 glossary_drift")
     for term_id in nodes_by_label(g, "GlossaryTerm"):
         datasets = in_edges(g, term_id, "DEFINES")
@@ -282,7 +99,7 @@ def query_glossary_drift(g: nx.MultiDiGraph) -> None:
             print(f"  {term_id} status={g.nodes[term_id].get('status')} datasets={sorted(datasets)}")
 
 
-def query_pipelines_without_repo(g: nx.MultiDiGraph) -> None:
+def query_pipelines_without_repo(g) -> None:
     print("06 pipelines_without_repo")
     for pipeline_id in nodes_by_label(g, "Pipeline"):
         has_repo = bool(out_edges(g, pipeline_id, "DEPLOYS_FROM") or in_edges(g, pipeline_id, "IMPLEMENTS"))
@@ -290,7 +107,7 @@ def query_pipelines_without_repo(g: nx.MultiDiGraph) -> None:
             print(f"  {g.nodes[pipeline_id].get('name')} ({pipeline_id})")
 
 
-def query_pii_to_bi(g: nx.MultiDiGraph) -> None:
+def query_pii_to_bi(g) -> None:
     print("07 pii_to_bi")
     for report_id in nodes_by_label(g, "Report"):
         pii_ids: set[str] = set()
@@ -312,7 +129,7 @@ def query_pii_to_bi(g: nx.MultiDiGraph) -> None:
             )
 
 
-def query_ownership_coverage(g: nx.MultiDiGraph) -> None:
+def query_ownership_coverage(g) -> None:
     print("08 ownership_coverage")
     counts: dict[str, list[str]] = {}
     owned = set()

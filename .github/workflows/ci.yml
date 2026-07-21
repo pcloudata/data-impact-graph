@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  demo-queries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run demo query pack
+        run: python scripts/demo_queries.py
+
+      - name: Run Snowflake extractor stub
+        run: python -m extractors.snowflake --pretty
+
+      - name: Smoke-test impact helper
+        run: |
+          python - <<'PY'
+          from impact_graph.graph import build_graph, impact_for_dataset
+          g = build_graph()
+          payload = impact_for_dataset(g, "acme.raw.sales.orders")
+          assert payload["reports"], payload
+          assert any(r["name"] == "Finance Close" for r in payload["reports"]), payload
+          print("impact ok:", payload["dataset"], "->", [r["name"] for r in payload["reports"]])
+          PY

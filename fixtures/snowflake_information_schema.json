@@ -1,0 +1,101 @@
+{
+  "account": "acme",
+  "as_of": "2026-07-20",
+  "notes": "Mocked INFORMATION_SCHEMA / OBJECT_DEPENDENCIES shape. In production, replace with Snowflake queries.",
+  "tables": [
+    {
+      "table_catalog": "RAW",
+      "table_schema": "SALES",
+      "table_name": "ORDERS",
+      "table_type": "BASE TABLE",
+      "layer": "raw",
+      "pii": true
+    },
+    {
+      "table_catalog": "CURATED",
+      "table_schema": "SALES",
+      "table_name": "ORDERS",
+      "table_type": "BASE TABLE",
+      "layer": "curated",
+      "pii": true
+    },
+    {
+      "table_catalog": "ANALYTICS",
+      "table_schema": "MART",
+      "table_name": "ORDERS",
+      "table_type": "BASE TABLE",
+      "layer": "mart",
+      "pii": false
+    },
+    {
+      "table_catalog": "RAW",
+      "table_schema": "HR",
+      "table_name": "EMPLOYEES",
+      "table_type": "BASE TABLE",
+      "layer": "raw",
+      "pii": true
+    },
+    {
+      "table_catalog": "RAW",
+      "table_schema": "MARKETING",
+      "table_name": "CAMPAIGNS",
+      "table_type": "BASE TABLE",
+      "layer": "raw",
+      "pii": false
+    },
+    {
+      "table_catalog": "ANALYTICS",
+      "table_schema": "MART",
+      "table_name": "CAMPAIGN_ROI",
+      "table_type": "BASE TABLE",
+      "layer": "mart",
+      "pii": false
+    },
+    {
+      "table_catalog": "ANALYTICS",
+      "table_schema": "MART",
+      "table_name": "ORPHAN_METRICS",
+      "table_type": "VIEW",
+      "layer": "mart",
+      "pii": false
+    }
+  ],
+  "object_dependencies": [
+    {
+      "referencing_database": "CURATED",
+      "referencing_schema": "SALES",
+      "referencing_object_name": "ORDERS",
+      "referenced_database": "RAW",
+      "referenced_schema": "SALES",
+      "referenced_object_name": "ORDERS",
+      "dependency_type": "BY_NAME"
+    },
+    {
+      "referencing_database": "ANALYTICS",
+      "referencing_schema": "MART",
+      "referencing_object_name": "ORDERS",
+      "referenced_database": "CURATED",
+      "referenced_schema": "SALES",
+      "referenced_object_name": "ORDERS",
+      "dependency_type": "BY_NAME"
+    },
+    {
+      "referencing_database": "ANALYTICS",
+      "referencing_schema": "MART",
+      "referencing_object_name": "CAMPAIGN_ROI",
+      "referenced_database": "RAW",
+      "referenced_schema": "MARKETING",
+      "referenced_object_name": "CAMPAIGNS",
+      "dependency_type": "BY_NAME"
+    },
+    {
+      "referencing_database": "ANALYTICS",
+      "referencing_schema": "MART",
+      "referencing_object_name": "ORPHAN_METRICS",
+      "referenced_database": "ANALYTICS",
+      "referenced_schema": "MART",
+      "referenced_object_name": "ORDERS",
+      "dependency_type": "BY_NAME"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+Loaded graph: 30 nodes, 47 edges
+
+01 blast_radius
+  root: acme.raw.sales.orders
+  downstream_datasets: ['acme.analytics.mart.orders', 'acme.analytics.mart.orphan_metrics', 'acme.curated.sales.orders']
+  reports: ['Finance Close']
+  pipelines: ['orders_etl']
+
+02 orphan_datasets
+  acme.analytics.mart.campaign_roi layer=mart
+  acme.analytics.mart.orphan_metrics layer=mart
+  acme.raw.marketing.campaigns layer=raw
+
+03 p1_risk_open_bugs
+  DATA-450 -> orders_etl -> acme.analytics.mart.orders -> Finance Close (P1)
+
+04 report_to_repo
+  report=Finance Close dataset=acme.analytics.mart.orders pipeline=orders_etl repo=acme-corp/data-platform owner=Finance Data
+
+05 glossary_drift
+  campaign_roi status=draft datasets=['acme.analytics.mart.campaign_roi', 'acme.analytics.mart.orders']
+
+06 pipelines_without_repo
+  orphan_campaign_load (123456789012:us-east-1:glue:orphan_campaign_load)
+
+07 pii_to_bi
+  Finance Close (P1): ['acme.curated.sales.orders', 'acme.raw.sales.orders']
+
+08 ownership_coverage
+  (unowned): 3 -> ['acme.raw.marketing.campaigns', 'acme.analytics.mart.campaign_roi', 'acme.analytics.mart.orphan_metrics']
+  Finance Data: 3 -> ['acme.raw.sales.orders', 'acme.curated.sales.orders', 'acme.analytics.mart.orders']
+  Data Platform: 1 -> ['acme.raw.hr.employees']

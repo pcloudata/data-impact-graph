@@ -1,0 +1,26 @@
+{
+  "dataset": "acme.raw.sales.orders",
+  "layer": "raw",
+  "pii": true,
+  "owner_team": "Finance Data",
+  "downstream_datasets": [
+    "acme.analytics.mart.orders",
+    "acme.analytics.mart.orphan_metrics",
+    "acme.curated.sales.orders"
+  ],
+  "pipelines": [
+    {
+      "id": "123456789012:us-east-1:glue:orders_etl",
+      "name": "orders_etl",
+      "repository": "acme-corp/data-platform",
+      "owner_team": "Finance Data"
+    }
+  ],
+  "reports": [
+    {
+      "id": "ws-finance:rpt-finance-close",
+      "name": "Finance Close",
+      "criticality": "P1"
+    }
+  ]
+}

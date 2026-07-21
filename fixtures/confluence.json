@@ -1,0 +1,40 @@
+{
+  "as_of": "2026-07-20",
+  "docs": [
+    {
+      "id": "data:1001",
+      "title": "Orders mart specification",
+      "url": "https://acme.atlassian.net/wiki/spaces/DATA/pages/1001",
+      "describes": [
+        {"type": "Dataset", "id": "acme.analytics.mart.orders"},
+        {"type": "GlossaryTerm", "id": "revenue"}
+      ]
+    },
+    {
+      "id": "data:1002",
+      "title": "Campaign ROI notes",
+      "url": "https://acme.atlassian.net/wiki/spaces/DATA/pages/1002",
+      "describes": [
+        {"type": "Dataset", "id": "acme.analytics.mart.campaign_roi"},
+        {"type": "Report", "id": "ws-marketing:rpt-campaign-roi"}
+      ]
+    }
+  ],
+  "glossary": [
+    {
+      "id": "revenue",
+      "definition": "Recognized order revenue in USD after returns.",
+      "status": "approved",
+      "defined_by_datasets": ["acme.analytics.mart.orders"]
+    },
+    {
+      "id": "campaign_roi",
+      "definition": "Attributed revenue divided by campaign spend.",
+      "status": "draft",
+      "defined_by_datasets": [
+        "acme.analytics.mart.campaign_roi",
+        "acme.analytics.mart.orders"
+      ]
+    }
+  ]
+}

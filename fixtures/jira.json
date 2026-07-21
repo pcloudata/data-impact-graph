@@ -1,0 +1,38 @@
+{
+  "as_of": "2026-07-20",
+  "tickets": [
+    {
+      "id": "DATA-123",
+      "type": "Story",
+      "status": "In Progress",
+      "priority": "High",
+      "url": "https://acme.atlassian.net/browse/DATA-123",
+      "tracks": [
+        {"type": "Doc", "id": "data:1001"},
+        {"type": "Dataset", "id": "acme.analytics.mart.orders"},
+        {"type": "Pipeline", "id": "123456789012:us-east-1:glue:orders_etl"}
+      ]
+    },
+    {
+      "id": "DATA-450",
+      "type": "Bug",
+      "status": "Open",
+      "priority": "Highest",
+      "url": "https://acme.atlassian.net/browse/DATA-450",
+      "tracks": [
+        {"type": "Pipeline", "id": "123456789012:us-east-1:glue:orders_etl"},
+        {"type": "Report", "id": "ws-finance:rpt-finance-close"}
+      ]
+    },
+    {
+      "id": "DATA-501",
+      "type": "Task",
+      "status": "Open",
+      "priority": "Medium",
+      "url": "https://acme.atlassian.net/browse/DATA-501",
+      "tracks": [
+        {"type": "Dataset", "id": "acme.analytics.mart.campaign_roi"}
+      ]
+    }
+  ]
+}

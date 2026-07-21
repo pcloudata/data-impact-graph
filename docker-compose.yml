@@ -1,0 +1,20 @@
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/impactgraph
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+      - ./graph/queries:/var/lib/neo4j/import/queries:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p impactgraph 'RETURN 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  neo4j_data:

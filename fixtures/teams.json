@@ -1,0 +1,52 @@
+{
+  "as_of": "2026-07-20",
+  "teams": [
+    {
+      "id": "finance-data",
+      "name": "Finance Data",
+      "cost_center": "CC-4400",
+      "members": [
+        {"id": "ava@example.com", "name": "Ava Chen", "slack": "@ava"},
+        {"id": "ben@example.com", "name": "Ben Ortiz", "slack": "@ben"}
+      ],
+      "owns": {
+        "datasets": [
+          "acme.raw.sales.orders",
+          "acme.curated.sales.orders",
+          "acme.analytics.mart.orders"
+        ],
+        "pipelines": ["123456789012:us-east-1:glue:orders_etl"],
+        "reports": ["ws-finance:rpt-finance-close"],
+        "repositories": ["acme-corp/data-platform"]
+      }
+    },
+    {
+      "id": "platform",
+      "name": "Data Platform",
+      "cost_center": "CC-1100",
+      "members": [
+        {"id": "priya@example.com", "name": "Priya Nair", "slack": "@priya"}
+      ],
+      "owns": {
+        "datasets": ["acme.raw.hr.employees"],
+        "pipelines": ["123456789012:us-east-1:glue:hr_ingest"],
+        "reports": [],
+        "repositories": ["acme-corp/ingest-common"]
+      }
+    },
+    {
+      "id": "marketing-analytics",
+      "name": "Marketing Analytics",
+      "cost_center": "CC-2200",
+      "members": [
+        {"id": "sam@example.com", "name": "Sam Lee", "slack": "@sam"}
+      ],
+      "owns": {
+        "datasets": [],
+        "pipelines": [],
+        "reports": ["ws-marketing:rpt-campaign-roi"],
+        "repositories": []
+      }
+    }
+  ]
+}

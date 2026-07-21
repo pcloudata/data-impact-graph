@@ -1,0 +1,19 @@
+{
+  "as_of": "2026-07-20",
+  "repositories": [
+    {
+      "id": "acme-corp/data-platform",
+      "url": "https://github.com/acme-corp/data-platform",
+      "default_branch": "main",
+      "codeowners_team": "finance-data",
+      "implements_pipelines": ["123456789012:us-east-1:glue:orders_etl"]
+    },
+    {
+      "id": "acme-corp/ingest-common",
+      "url": "https://github.com/acme-corp/ingest-common",
+      "default_branch": "main",
+      "codeowners_team": "platform",
+      "implements_pipelines": ["123456789012:us-east-1:glue:hr_ingest"]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "as_of": "2026-07-20",
+  "semantic_models": [
+    {
+      "id": "ws-finance:ds-orders",
+      "name": "Orders Model",
+      "workspace_name": "Finance",
+      "snowflake_datasets": ["acme.analytics.mart.orders"]
+    },
+    {
+      "id": "ws-marketing:ds-campaigns",
+      "name": "Campaign Model",
+      "workspace_name": "Marketing",
+      "snowflake_datasets": ["acme.analytics.mart.campaign_roi"]
+    }
+  ],
+  "reports": [
+    {
+      "id": "ws-finance:rpt-finance-close",
+      "name": "Finance Close",
+      "workspace_name": "Finance",
+      "criticality": "P1",
+      "semantic_model": "ws-finance:ds-orders",
+      "snowflake_datasets": ["acme.analytics.mart.orders"]
+    },
+    {
+      "id": "ws-marketing:rpt-campaign-roi",
+      "name": "Campaign ROI",
+      "workspace_name": "Marketing",
+      "criticality": "P2",
+      "semantic_model": "ws-marketing:ds-campaigns",
+      "snowflake_datasets": ["acme.analytics.mart.campaign_roi"]
+    }
+  ]
+}

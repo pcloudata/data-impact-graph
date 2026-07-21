@@ -1,0 +1,54 @@
+{
+  "as_of": "2026-07-20",
+  "datasets": [
+    {
+      "id": "acme.raw.sales.orders",
+      "object_type": "table",
+      "layer": "raw",
+      "pii": true,
+      "upstream": []
+    },
+    {
+      "id": "acme.curated.sales.orders",
+      "object_type": "table",
+      "layer": "curated",
+      "pii": true,
+      "upstream": ["acme.raw.sales.orders"]
+    },
+    {
+      "id": "acme.analytics.mart.orders",
+      "object_type": "table",
+      "layer": "mart",
+      "pii": false,
+      "upstream": ["acme.curated.sales.orders"]
+    },
+    {
+      "id": "acme.raw.hr.employees",
+      "object_type": "table",
+      "layer": "raw",
+      "pii": true,
+      "upstream": []
+    },
+    {
+      "id": "acme.raw.marketing.campaigns",
+      "object_type": "table",
+      "layer": "raw",
+      "pii": false,
+      "upstream": []
+    },
+    {
+      "id": "acme.analytics.mart.campaign_roi",
+      "object_type": "table",
+      "layer": "mart",
+      "pii": false,
+      "upstream": ["acme.raw.marketing.campaigns"]
+    },
+    {
+      "id": "acme.analytics.mart.orphan_metrics",
+      "object_type": "view",
+      "layer": "mart",
+      "pii": false,
+      "upstream": ["acme.analytics.mart.orders"]
+    }
+  ]
+}

@@ -127,12 +127,6 @@ Team Finance Data ──OWNS──▶ ANALYTICS.ORDERS ◀──USES── Power
 3. **Table-level first** — column lineage is v0.5+ (noisy and expensive).
 4. **Catalog-friendly** — this graph complements a catalog; it does not replace Snowflake or Power BI.
 
-## Profile pin (manual)
-
-Repo topics are set (`data-engineering`, `lineage`, `knowledge-graph`, `snowflake`, `neo4j`). GitHub does not expose a stable public API to pin repos on a profile — pin it in the UI:
-
-1. Open https://github.com/pcloudata
-2. Customize pinned repositories → select **data-impact-graph**
 
 ## License
 

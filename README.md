@@ -16,13 +16,13 @@ This is a **showcase / reference design**, not a production catalog. It answers 
 flowchart LR
   tools[Jira_Confluence_GitHub_AWS_Snowflake_PowerBI]
   extractors[Extractor_stubs]
-  graph[Property_graph_NetworkX_or_Neo4j]
+  graphStore[Property_graph_NetworkX_or_Neo4j]
   api["GET_/impact"]
   ui[Demo_UI]
 
   tools --> extractors
-  extractors --> graph
-  graph --> api
+  extractors --> graphStore
+  graphStore --> api
   api --> ui
 ```
 

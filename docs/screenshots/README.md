@@ -6,6 +6,7 @@ Generated from the showcase graph (no Neo4j required):
 |------|----------------|
 | [`demo_queries.txt`](demo_queries.txt) | Full demo query pack terminal output |
 | [`impact_api.json`](impact_api.json) | Sample `GET /impact?dataset=acme.raw.sales.orders` response |
+| [`social-preview.png`](social-preview.png) | Upload as GitHub repo social preview image |
 
 Regenerate:
 

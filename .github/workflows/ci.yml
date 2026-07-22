@@ -25,6 +25,7 @@ jobs:
         run: |
           python -m extractors.snowflake --pretty
           python -m extractors.powerbi --pretty
+          python -m extractors.jira --pretty
 
       - name: Merge Snowflake extract into graph
         run: python scripts/merge_snowflake_extract.py --empty --pretty

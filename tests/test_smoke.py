@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from api.main import app
+from extractors.jira import extract as extract_jira
 from extractors.powerbi import extract as extract_powerbi
 from extractors.snowflake import extract as extract_snowflake
 from impact_graph.apply_extract import apply_extract
@@ -50,6 +51,18 @@ def test_powerbi_extractor_emits_reports_and_uses():
     assert any(e["type"] == "BINDS" for e in payload["edges"])
 
 
+def test_jira_extractor_emits_tickets_and_tracks():
+    payload = extract_jira()
+    assert payload["extractor"] == "jira"
+    assert any(n["id"] == "DATA-450" and n["label"] == "Ticket" for n in payload["nodes"])
+    assert any(
+        e["type"] == "TRACKS"
+        and e["from"] == "DATA-450"
+        and e["to"] == "123456789012:us-east-1:glue:orders_etl"
+        for e in payload["edges"]
+    )
+
+
 def test_apply_snowflake_extract_onto_empty_graph():
     g = nx.MultiDiGraph()
     stats = apply_extract(g, extract_snowflake())
@@ -73,6 +86,7 @@ def test_impact_for_dataset(graph):
     assert payload["owner_team"] == "Finance Data"
     assert "acme.analytics.mart.orders" in payload["downstream_datasets"]
     assert any(r["name"] == "Finance Close" for r in payload["reports"])
+    assert any(t["id"] == "DATA-450" for t in payload["open_tickets"])
 
 
 def test_impact_api_ok():
@@ -82,6 +96,22 @@ def test_impact_api_ok():
     body = response.json()
     assert body["dataset"] == "acme.raw.sales.orders"
     assert any(r["name"] == "Finance Close" for r in body["reports"])
+    assert any(t["id"] == "DATA-450" for t in body["open_tickets"])
+
+
+def test_datasets_api():
+    client = TestClient(app)
+    response = client.get("/datasets")
+    assert response.status_code == 200
+    ids = [row["id"] for row in response.json()["datasets"]]
+    assert "acme.raw.sales.orders" in ids
+
+
+def test_ui_index():
+    client = TestClient(app)
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "data-impact-graph" in response.text
 
 
 def test_impact_api_404():

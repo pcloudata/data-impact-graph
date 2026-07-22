@@ -1,0 +1,46 @@
+{
+  "as_of": "2026-07-20",
+  "notes": "Mocked Jira Search / JQL API shape. Production would call /rest/api/3/search with project = DATA and issue links / custom fields for asset IDs.",
+  "issues": [
+    {
+      "key": "DATA-123",
+      "fields": {
+        "issuetype": {"name": "Story"},
+        "status": {"name": "In Progress"},
+        "priority": {"name": "High"},
+        "summary": "Harden orders mart freshness SLA",
+        "customfield_asset_links": [
+          {"type": "Doc", "id": "data:1001"},
+          {"type": "Dataset", "id": "acme.analytics.mart.orders"},
+          {"type": "Pipeline", "id": "123456789012:us-east-1:glue:orders_etl"}
+        ]
+      }
+    },
+    {
+      "key": "DATA-450",
+      "fields": {
+        "issuetype": {"name": "Bug"},
+        "status": {"name": "Open"},
+        "priority": {"name": "Highest"},
+        "summary": "orders_etl null revenue spikes Finance Close",
+        "customfield_asset_links": [
+          {"type": "Pipeline", "id": "123456789012:us-east-1:glue:orders_etl"},
+          {"type": "Report", "id": "ws-finance:rpt-finance-close"}
+        ]
+      }
+    },
+    {
+      "key": "DATA-501",
+      "fields": {
+        "issuetype": {"name": "Task"},
+        "status": {"name": "Open"},
+        "priority": {"name": "Medium"},
+        "summary": "Document campaign_roi ownership gap",
+        "customfield_asset_links": [
+          {"type": "Dataset", "id": "acme.analytics.mart.campaign_roi"}
+        ]
+      }
+    }
+  ],
+  "browse_base_url": "https://acme.atlassian.net/browse"
+}

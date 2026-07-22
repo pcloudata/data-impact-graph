@@ -12,6 +12,7 @@ v0 uses **JSON fixtures** under [`fixtures/`](../fixtures/) instead of live APIs
 | `powerbi.json` | `Report`, `SemanticModel` | `BINDS`, `USES` |
 | `powerbi_scanner.json` | `Report`, `SemanticModel` (via [`extractors/powerbi.py`](../extractors/powerbi.py)) | `BINDS`, `USES` from mocked scanner datasources |
 | `jira.json` | `Ticket` | `TRACKS` |
+| `jira_search.json` | `Ticket` (via [`extractors/jira.py`](../extractors/jira.py)) | `TRACKS` from mocked JQL / custom asset links |
 | `confluence.json` | `Doc`, `GlossaryTerm` | `DESCRIBES`, `DEFINES` |
 
 ## Field mapping (highlights)

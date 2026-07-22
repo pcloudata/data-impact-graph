@@ -229,6 +229,26 @@ def impact_for_dataset(g: nx.MultiDiGraph, dataset_id: str) -> dict[str, Any]:
             )
 
     owners = in_edges(g, dataset_id, "OWNS")
+
+    tracked_ids = relevant | {p["id"] for p in pipelines} | {r["id"] for r in reports}
+    open_tickets = []
+    for ticket_id in nodes_by_label(g, "Ticket"):
+        ticket = g.nodes[ticket_id]
+        status = (ticket.get("status") or "").lower()
+        if status not in {"open", "in progress"}:
+            continue
+        tracked = out_edges(g, ticket_id, "TRACKS")
+        if any(target in tracked_ids for target in tracked):
+            open_tickets.append(
+                {
+                    "id": ticket_id,
+                    "type": ticket.get("type"),
+                    "status": ticket.get("status"),
+                    "priority": ticket.get("priority"),
+                    "url": ticket.get("url"),
+                }
+            )
+
     return {
         "dataset": dataset_id,
         "layer": g.nodes[dataset_id].get("layer"),
@@ -237,4 +257,21 @@ def impact_for_dataset(g: nx.MultiDiGraph, dataset_id: str) -> dict[str, Any]:
         "downstream_datasets": downstream,
         "pipelines": sorted(pipelines, key=lambda item: item["name"] or ""),
         "reports": sorted(reports, key=lambda item: item["name"] or ""),
+        "open_tickets": sorted(open_tickets, key=lambda item: item["id"] or ""),
     }
+
+
+def list_datasets(g: nx.MultiDiGraph) -> list[dict[str, Any]]:
+    """Dataset catalog for the demo UI dropdown."""
+    rows = []
+    for dataset_id in nodes_by_label(g, "Dataset"):
+        owners = in_edges(g, dataset_id, "OWNS")
+        rows.append(
+            {
+                "id": dataset_id,
+                "layer": g.nodes[dataset_id].get("layer"),
+                "pii": g.nodes[dataset_id].get("pii"),
+                "owner_team": g.nodes[owners[0]].get("name") if owners else None,
+            }
+        )
+    return sorted(rows, key=lambda item: item["id"])

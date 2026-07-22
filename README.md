@@ -10,6 +10,30 @@ This is a **showcase / reference design**, not a production catalog. It answers 
 - Which datasets have no owning team?
 - Which open Jira bugs track jobs that feed P1 reports?
 
+## Architecture
+
+```mermaid
+flowchart LR
+  tools[Jira_Confluence_GitHub_AWS_Snowflake_PowerBI]
+  extractors[Extractor_stubs]
+  graph[Property_graph_NetworkX_or_Neo4j]
+  api["GET_/impact"]
+  ui[Demo_UI]
+
+  tools --> extractors
+  extractors --> graph
+  graph --> api
+  api --> ui
+```
+
+| Stage | What happens |
+|-------|----------------|
+| Tools | Source systems of record |
+| Extractors | Normalize IDs → nodes/edges (`snowflake`, `powerbi`, `jira`) |
+| Graph | Ownership + lineage + ticket/report links |
+| `/impact` | Blast radius JSON for a dataset |
+| UI | Dropdown demo at `/` |
+
 ## Interview talk track (30–60s)
 
 **Problem.** Platform work spans Jira, Confluence, GitHub, AWS, Snowflake, and Power BI. Blast radius is tribal knowledge.
@@ -18,7 +42,7 @@ This is a **showcase / reference design**, not a production catalog. It answers 
 
 **Punchline.** Change impact on `acme.raw.sales.orders` surfaces curated/mart tables, `orders_etl`, and P1 **Finance Close** in one hop path — see [docs/screenshots/demo_queries.txt](docs/screenshots/demo_queries.txt).
 
-> Full script: [docs/talk-track.md](docs/talk-track.md)
+> Full script: [docs/talk-track.md](docs/talk-track.md) · Change runbook: [docs/runbook-change-impact.md](docs/runbook-change-impact.md)
 
 ## When *not* to build this
 
@@ -32,6 +56,14 @@ Prefer Snowflake native lineage + a data catalog (DataHub, OpenMetadata, Alation
 Build (or extend a catalog graph) when change impact routinely crosses **AWS → Snowflake → Power BI → Jira/GitHub**, and ownership is fragmented across CODEOWNERS, warehouse tags, and tickets.
 
 ## Quick start
+
+On macOS, use **`python3`** and the project venv (`python` / bare `pytest` are often missing from PATH).
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
 
 ### Option A — Neo4j (recommended for demos)
 
@@ -51,27 +83,31 @@ Browser UI: [http://localhost:7474](http://localhost:7474) — user `neo4j` / pa
 ### Option B — No Docker (Python walkthrough)
 
 ```bash
-python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
 python scripts/demo_queries.py
 ```
 
-### Option C — Impact API
+### Option C — Impact API + clickable UI
 
 ```bash
 source .venv/bin/activate
 uvicorn api.main:app --reload --port 8000
-curl "http://127.0.0.1:8000/impact?dataset=acme.raw.sales.orders"
 ```
 
+- UI: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+- API: `curl "http://127.0.0.1:8000/impact?dataset=acme.raw.sales.orders"`
+
 Sample response: [docs/screenshots/impact_api.json](docs/screenshots/impact_api.json).
+
+Walk through a PR change: [docs/runbook-change-impact.md](docs/runbook-change-impact.md).
 
 ### Extractor stubs
 
 ```bash
+source .venv/bin/activate
 python -m extractors.snowflake --pretty
 python -m extractors.powerbi --pretty
+python -m extractors.jira --pretty
 
 # Production-shaped ingest: extract → upsert into NetworkX
 python scripts/merge_snowflake_extract.py --empty --pretty
@@ -79,10 +115,12 @@ python scripts/merge_snowflake_extract.py --empty --pretty
 
 - Snowflake: mocked INFORMATION_SCHEMA → `Dataset` + `DERIVES_FROM`
 - Power BI: mocked Admin Scanner → `Report` / `SemanticModel` + `USES` / `BINDS`
+- Jira: mocked JQL search → `Ticket` + `TRACKS`
 
 ### Tests
 
 ```bash
+source .venv/bin/activate
 pytest -q
 ```
 
@@ -94,16 +132,16 @@ pytest -q
 | [`docs/ingest-map.md`](docs/ingest-map.md) | Mock source → graph mapping |
 | [`docs/go-no-go.md`](docs/go-no-go.md) | Leadership checklist |
 | [`docs/talk-track.md`](docs/talk-track.md) | 30–60s interview script |
-| [`docs/screenshots/`](docs/screenshots/) | Captured demo + API output |
+| [`docs/runbook-change-impact.md`](docs/runbook-change-impact.md) | PR → `/impact` → who to ping |
+| [`docs/screenshots/`](docs/screenshots/) | Captured demo + social preview image |
+| [`web/`](web/) | Tiny impact UI |
 | [`graph/seed.cypher`](graph/seed.cypher) | Synthetic but realistic demo graph |
 | [`graph/queries/`](graph/queries/) | Impact / ownership / governance Cypher |
 | [`fixtures/`](fixtures/) | JSON stand-ins for tool extracts |
-| [`extractors/snowflake.py`](extractors/snowflake.py) | INFORMATION_SCHEMA → graph stub |
-| [`extractors/powerbi.py`](extractors/powerbi.py) | Scanner API → Report/USES stub |
+| [`extractors/`](extractors/) | Snowflake / Power BI / Jira stubs |
 | [`scripts/merge_snowflake_extract.py`](scripts/merge_snowflake_extract.py) | Extract → NetworkX upsert path |
-| [`api/main.py`](api/main.py) | FastAPI `GET /impact` |
+| [`api/main.py`](api/main.py) | FastAPI `/`, `/datasets`, `/impact` |
 | [`tests/test_smoke.py`](tests/test_smoke.py) | Pytest smoke suite |
-| [`scripts/demo_queries.py`](scripts/demo_queries.py) | Docker-free query demo |
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Demo + extractors + pytest |
 
 ## Example blast radius
@@ -127,6 +165,10 @@ Team Finance Data ──OWNS──▶ ANALYTICS.ORDERS ◀──USES── Power
 3. **Table-level first** — column lineage is v0.5+ (noisy and expensive).
 4. **Catalog-friendly** — this graph complements a catalog; it does not replace Snowflake or Power BI.
 
+## GitHub profile / social preview
+
+1. Pin **data-impact-graph** on https://github.com/pcloudata (Customize pinned repositories).
+2. Set social preview image: repo **Settings → General → Social preview** → upload [`docs/screenshots/social-preview.png`](docs/screenshots/social-preview.png).
 
 ## License
 

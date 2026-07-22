@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>data-impact-graph</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="brand">data-impact-graph</p>
+      <h1>Blast radius before you merge</h1>
+      <p class="lede">Pick a dataset. See downstream tables, jobs, P1 reports, owners, and open tickets.</p>
+    </header>
+
+    <section class="panel">
+      <label for="dataset">Dataset</label>
+      <div class="row">
+        <select id="dataset"></select>
+        <button id="run" type="button">Run impact</button>
+      </div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <section class="grid" id="summary" hidden>
+      <article>
+        <h2>Owner</h2>
+        <p id="owner">—</p>
+      </article>
+      <article>
+        <h2>P1 reports</h2>
+        <p id="p1">—</p>
+      </article>
+      <article>
+        <h2>Open tickets</h2>
+        <p id="tickets">—</p>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Impact JSON</h2>
+      <pre id="output">Select a dataset and run impact.</pre>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

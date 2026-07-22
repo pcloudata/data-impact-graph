@@ -165,10 +165,6 @@ Team Finance Data ──OWNS──▶ ANALYTICS.ORDERS ◀──USES── Power
 3. **Table-level first** — column lineage is v0.5+ (noisy and expensive).
 4. **Catalog-friendly** — this graph complements a catalog; it does not replace Snowflake or Power BI.
 
-## GitHub profile / social preview
-
-1. Pin **data-impact-graph** on https://github.com/pcloudata (Customize pinned repositories).
-2. Set social preview image: repo **Settings → General → Social preview** → upload [`docs/screenshots/social-preview.png`](docs/screenshots/social-preview.png).
 
 ## License
 
